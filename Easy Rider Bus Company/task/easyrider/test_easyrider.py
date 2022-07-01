@@ -34,7 +34,7 @@ class TestEasyrider(unittest.TestCase):
         self.assertTrue(easyrider.check_stop_type('S'), 'Error when checking "S"')
         self.assertTrue(easyrider.check_stop_type('O'), 'Error when checking "O"')
         self.assertTrue(easyrider.check_stop_type('F'), 'Error when checking "F"')
-        self.assertFalse(easyrider.check_stop_type(''), 'Error when checking empty string')
+        self.assertTrue(easyrider.check_stop_type(''), 'Error when checking empty string')
         self.assertFalse(easyrider.check_stop_type('X'), 'Error when checking "X"')
         self.assertFalse(easyrider.check_stop_type('SOF'), 'Error when checking "SOF"')
         self.assertFalse(easyrider.check_stop_type(16), 'Error when checking 16')
@@ -49,7 +49,8 @@ class TestEasyrider(unittest.TestCase):
         self.assertFalse(easyrider.check_a_time('08:1'), 'Error when checking "08:1"')
         self.assertFalse(easyrider.check_a_time('08.19'), 'Error when checking "08.19"')
         self.assertFalse(easyrider.check_a_time(''), 'Error when checking ""')
-        self.assertFalse(easyrider.check_a_time(08.12), 'Error when checking 08.12')
+        self.assertFalse(easyrider.check_a_time('12:00:00'), 'Error when checking "12:00:00"')
+        self.assertFalse(easyrider.check_a_time('time'), 'Error when checking "time"')
 
 
 if __name__ == '__main__':
