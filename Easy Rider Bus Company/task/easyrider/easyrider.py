@@ -55,13 +55,60 @@ def check_data(data):
 
 
 def get_stops(data):
-    stops_dict = {}
     json_data = json.loads(data)
+    lines_dict = {}
     for item in json_data:
         bus_id = item['bus_id']
-        stops_dict.setdefault(bus_id, 0)
-        stops_dict[bus_id] += 1
-    return stops_dict
+        lines_dict.setdefault(bus_id, 0)
+        lines_dict[bus_id] += 1
+    print('Line names and number of stops:')
+    for line in lines_dict:
+        print(f'bus_id: {line}, stops: {lines_dict[line]}')
+    return lines_dict
+
+
+def get_route_dictionary(data):
+    json_data = json.loads(data)
+    route_dict = {}
+    for item in json_data:
+        bus_id = item['bus_id']
+        stop_name = item['stop_name']
+        stop_type = item['stop_type']
+        route_dict.setdefault(bus_id, {'start': '', 'finish': '', 'stops': set()})
+        route_dict[bus_id]['stops'].add(stop_name)
+        if stop_type == 'S':
+            if route_dict[bus_id]['start'] != '':
+                return bus_id
+            else:
+                route_dict[bus_id]['start'] = stop_name
+        if stop_type == 'F':
+            if route_dict[bus_id]['finish'] != '':
+                return bus_id
+            else:
+                route_dict[bus_id]['finish'] = stop_name
+    return route_dict
+
+
+def process_route_dictionary(route_dict):
+    start_stops = set()
+    transfer_stops = set()
+    finish_stops = set()
+    list_of_routes = list(route_dict.keys())
+    while list_of_routes:
+        test_item = list_of_routes.pop()
+        if route_dict[test_item]['start'] == '' or route_dict[test_item]['finish'] == '':
+            print(f'There is no start or end stop for the line: {test_item}.')
+            return False
+        start_stops.add(route_dict[test_item]['start'])
+        finish_stops.add(route_dict[test_item]['finish'])
+        for route in list_of_routes:
+            transfer_stops.update(route_dict[test_item]['stops'].intersection(route_dict[route]['stops']))
+    start_stops = sorted(list(start_stops))
+    transfer_stops = sorted(list(transfer_stops))
+    finish_stops = sorted(list(finish_stops))
+    print('Start stops:', len(start_stops), start_stops)
+    print('Transfer stops:', len(transfer_stops), transfer_stops)
+    print('Finish stops:', len(finish_stops), finish_stops)
 
 
 error_dict = {'bus_id': {'method': check_bus_id, 'counter': 0},
@@ -71,7 +118,8 @@ error_dict = {'bus_id': {'method': check_bus_id, 'counter': 0},
               'stop_type': {'method': check_stop_type, 'counter': 0},
               'a_time': {'method': check_a_time, 'counter': 0}}
 
-stops = get_stops(input())
-print('Line names and number of stops:')
-for line in stops:
-    print(f'bus_id: {line}, stops: {stops[line]}')
+route_dictionary = get_route_dictionary(input())
+if isinstance(route_dictionary, int):
+    print(f'There is no start or end stop for the line: {route_dictionary}.')
+else:
+    process_route_dictionary(route_dictionary)
