@@ -111,6 +111,26 @@ def process_route_dictionary(route_dict):
     print('Finish stops:', len(finish_stops), finish_stops)
 
 
+def arrival_time_test(data):
+    json_data = json.loads(data)
+    bus_dict = {}
+    err_dict = {}
+    for item in json_data:
+        bus_id = item['bus_id']
+        a_time = datetime.strptime(item['a_time'], '%H:%M')
+        bus_dict.setdefault(bus_id, datetime(1899, 1, 1))
+        if a_time > bus_dict[bus_id]:
+            bus_dict[bus_id] = a_time
+        elif bus_id not in err_dict:
+            err_dict[bus_id] = item['stop_name']
+    print('Arrival time test:')
+    if err_dict:
+        for error in err_dict:
+            print(f'bus_id line {error}: wrong time on station {err_dict[error]}')
+    else:
+        print('OK')
+
+
 error_dict = {'bus_id': {'method': check_bus_id, 'counter': 0},
               'stop_id': {'method': check_stop_id, 'counter': 0},
               'stop_name': {'method': check_stop_name, 'counter': 0},
@@ -118,8 +138,4 @@ error_dict = {'bus_id': {'method': check_bus_id, 'counter': 0},
               'stop_type': {'method': check_stop_type, 'counter': 0},
               'a_time': {'method': check_a_time, 'counter': 0}}
 
-route_dictionary = get_route_dictionary(input())
-if isinstance(route_dictionary, int):
-    print(f'There is no start or end stop for the line: {route_dictionary}.')
-else:
-    process_route_dictionary(route_dictionary)
+arrival_time_test(input())
