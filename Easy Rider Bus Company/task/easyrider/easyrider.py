@@ -40,8 +40,7 @@ def check_a_time_alt(a_time):
         return False
 
 
-def check_data(data):
-    json_data = json.loads(data)
+def check_data(json_data):
     error_counter = 0
     for item in json_data:
         for key in item:
@@ -54,8 +53,7 @@ def check_data(data):
             print(f'{key}: {error_dict[key]["counter"]}')
 
 
-def get_stops(data):
-    json_data = json.loads(data)
+def get_stops(json_data):
     lines_dict = {}
     for item in json_data:
         bus_id = item['bus_id']
@@ -67,8 +65,7 @@ def get_stops(data):
     return lines_dict
 
 
-def get_route_dictionary(data):
-    json_data = json.loads(data)
+def get_route_dictionary(json_data):
     route_dict = {}
     for item in json_data:
         bus_id = item['bus_id']
@@ -106,13 +103,10 @@ def process_route_dictionary(route_dict):
     start_stops = sorted(list(start_stops))
     transfer_stops = sorted(list(transfer_stops))
     finish_stops = sorted(list(finish_stops))
-    print('Start stops:', len(start_stops), start_stops)
-    print('Transfer stops:', len(transfer_stops), transfer_stops)
-    print('Finish stops:', len(finish_stops), finish_stops)
+    return start_stops, transfer_stops, finish_stops
 
 
-def arrival_time_test(data):
-    json_data = json.loads(data)
+def arrival_time_test(json_data):
     bus_dict = {}
     err_dict = {}
     for item in json_data:
@@ -131,6 +125,19 @@ def arrival_time_test(data):
         print('OK')
 
 
+def on_demand_stops_test(json_data, transfer_stops):
+    wrong_stops = []
+    for item in json_data:
+        stop_name = item['stop_name']
+        if item['stop_type'] == 'O' and stop_name in transfer_stops:
+            wrong_stops.append(stop_name)
+    print('On demand stops test:')
+    if wrong_stops:
+        print('Wrong stop type:', sorted(wrong_stops))
+    else:
+        print('OK')
+
+
 error_dict = {'bus_id': {'method': check_bus_id, 'counter': 0},
               'stop_id': {'method': check_stop_id, 'counter': 0},
               'stop_name': {'method': check_stop_name, 'counter': 0},
@@ -138,4 +145,8 @@ error_dict = {'bus_id': {'method': check_bus_id, 'counter': 0},
               'stop_type': {'method': check_stop_type, 'counter': 0},
               'a_time': {'method': check_a_time, 'counter': 0}}
 
-arrival_time_test(input())
+data = json.loads(input())
+dictionary = get_route_dictionary(data)
+start_stops, transfer_stops, finish_stops = process_route_dictionary(dictionary)
+
+on_demand_stops_test(data, transfer_stops)
